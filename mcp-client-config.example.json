@@ -1,0 +1,88 @@
+{
+  "// NOTE": "This is an example MCP client configuration for various AI agents/IDEs",
+  "// Replace paths and values according to your setup": "",
+  
+  "mcpServers": {
+    "conhub": {
+      "// Server Name": "ConHub Context Server",
+      "command": "c:/Users/risha/Desktop/Work/ConHub/mcp/target/release/mcp-service.exe",
+      "args": [],
+      "cwd": "c:/Users/risha/Desktop/Work/ConHub/mcp",
+      "env": {
+        "DATABASE_URL": "postgresql://conhub:conhub_password@localhost:5432/conhub",
+        "FS_ROOT_PATHS": "c:/Users/risha/Desktop/Work/ConHub",
+        "ENABLE_FS": "true",
+        "ENABLE_GITHUB": "true",
+        "GITHUB_TOKEN": "ghp_your_github_token_here",
+        "RUST_LOG": "info"
+      }
+    }
+  },
+  
+  "// For Cursor IDE": {
+    "// Location": "%APPDATA%/Cursor/User/globalStorage/mcp/settings.json",
+    "// Or on Mac/Linux": "~/.config/Cursor/User/globalStorage/mcp/settings.json",
+    "// Copy the mcpServers object above into that file": ""
+  },
+  
+  "// For Windsurf": {
+    "// Location": "Check Windsurf documentation for MCP config path",
+    "// Usually similar to Cursor": ""
+  },
+  
+  "// For Cline (VS Code Extension)": {
+    "// Location": "VS Code Settings -> Extensions -> Cline -> MCP Servers",
+    "// Or edit VS Code settings.json": "",
+    "cline.mcpServers": {
+      "conhub": {
+        "command": "c:/Users/risha/Desktop/Work/ConHub/mcp/target/release/mcp-service.exe",
+        "args": [],
+        "cwd": "c:/Users/risha/Desktop/Work/ConHub/mcp"
+      }
+    }
+  },
+  
+  "// Advanced Configuration Examples": {
+    "// Multiple root paths": {
+      "FS_ROOT_PATHS": "c:/Projects,c:/Documents,c:/Code"
+    },
+    
+    "// Using Neon DB instead of local": {
+      "DATABASE_URL": "postgresql://neondb_owner:npg_xxx@ep-xxx.neon.tech/neondb?sslmode=require"
+    },
+    
+    "// Enable more connectors": {
+      "ENABLE_FS": "true",
+      "ENABLE_GITHUB": "true",
+      "ENABLE_GITLAB": "true",
+      "ENABLE_NOTION": "true",
+      "GITHUB_TOKEN": "ghp_your_token",
+      "GITLAB_TOKEN": "glpat_your_token",
+      "NOTION_TOKEN": "secret_your_token"
+    },
+    
+    "// Debug logging": {
+      "RUST_LOG": "debug"
+    }
+  },
+  
+  "// Available Tools (examples)": [
+    "fs.list_files - List files in a directory",
+    "fs.read_file - Read file contents",
+    "fs.search_files - Search files by pattern",
+    "github.list_repositories - List GitHub repos",
+    "github.get_file - Get file from repository",
+    "github.search_code - Search code across repos",
+    "gitlab.list_projects - List GitLab projects",
+    "notion.search - Search Notion pages",
+    "// Use tools/list to see all available tools"
+  ],
+  
+  "// Testing the Connection": {
+    "1. Build the server": "cd mcp && cargo build --release",
+    "2. Configure your IDE": "Add the mcpServers config above",
+    "3. Restart your IDE": "",
+    "4. Test in IDE": "Ask the AI agent to 'list files in the ConHub project'",
+    "5. Check logs": "The mcp-service will log all requests to console"
+  }
+}

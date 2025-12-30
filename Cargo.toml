@@ -1,0 +1,64 @@
+[package]
+name = "mcp-service"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "mcp-service"
+path = "src/main.rs"
+
+[dependencies]
+# Shared workspace libraries
+conhub-models = { path = "../shared/models" }
+conhub-utils = { path = "../shared/utils" }
+conhub-middleware = { path = "../shared/middleware" }
+conhub-config = { path = "../shared/config" }
+conhub-database = { path = "../database" }
+conhub-observability = { path = "../shared/observability" }
+
+# Web framework
+actix-web = "4.4"
+actix-cors = "0.7"
+actix-ws = "0.2"
+actix = "0.13"
+actix-web-actors = "4.3"
+
+# Async runtime
+tokio = { version = "1.0", features = ["full"] }
+futures = "0.3"
+futures-util = "0.3"
+async-trait = "0.1"
+
+# Serialization
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+
+# Logging
+tracing = "0.1"
+tracing-subscriber = { version = "0.3", features = ["json", "env-filter", "chrono"] }
+tracing-actix-web = "0.7"
+log = "0.4"
+env_logger = "0.10"
+
+# Database
+sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chrono", "uuid", "migrate"] }
+uuid = { version = "1.6", features = ["v4", "serde"] }
+chrono = { version = "0.4", features = ["serde"] }
+
+# HTTP client
+reqwest = { version = "0.11", features = ["json"] }
+
+# Configuration
+dotenv = "0.15"
+anyhow = "1.0"
+thiserror = "1.0"
+
+# Utilities
+lazy_static = "1.4"
+dashmap = "5.5"
+parking_lot = "0.12"
+once_cell = "1.19"
+bytes = "1.5"
+
+# MCP Protocol
+jsonrpc-core = "18.0"
