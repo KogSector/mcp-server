@@ -2,3 +2,4 @@
 /.sqlx/
 .env.*
 *.log
+.env
