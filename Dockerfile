@@ -6,18 +6,16 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     libssl-dev \
     libpq-dev \
+    curl \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Copy shared dependencies first
-COPY shared ./shared
-
-# Copy mcp service
-COPY mcp ./mcp
+# Copy source files
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
 
 # Build the application
-WORKDIR /app/mcp
 RUN cargo build --release
 
 # Runtime stage
@@ -37,10 +35,7 @@ RUN useradd -m -u 1001 conhub
 WORKDIR /app
 
 # Copy the binary from builder
-COPY --from=builder /app/mcp/target/release/mcp-service /app/mcp-service
-
-# Copy .env.example as template
-COPY mcp/.env.example /app/.env.example
+COPY --from=builder /app/target/release/mcp-server /app/mcp-server
 
 # Set ownership
 RUN chown -R conhub:conhub /app
@@ -53,4 +48,4 @@ EXPOSE 3004
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3004/health || exit 1
 
-CMD ["/app/mcp-service"]
+CMD ["/app/mcp-server"]
