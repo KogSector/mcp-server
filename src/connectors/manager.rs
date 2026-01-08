@@ -6,8 +6,8 @@ use crate::{
     errors::{McpError, McpResult},
     protocol::McpTool,
     security_client::SecurityClient,
+    db::Database,
 };
-use conhub_database::Database;
 use std::collections::HashMap;
 use std::sync::Arc;
 

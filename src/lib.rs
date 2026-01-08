@@ -7,6 +7,7 @@ pub mod context;
 pub mod connectors;
 pub mod security_client;
 pub mod errors;
+pub mod db;
 
 pub use config::McpConfig;
 pub use errors::{McpError, McpResult};

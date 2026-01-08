@@ -8,13 +8,12 @@ name = "mcp-service"
 path = "src/main.rs"
 
 [dependencies]
-# Shared workspace libraries (from ConHub monorepo)
-conhub-models = { path = "../ConHub/shared/models" }
-conhub-utils = { path = "../ConHub/shared/utils" }
-conhub-middleware = { path = "../ConHub/shared/middleware" }
-conhub-config = { path = "../ConHub/shared/config" }
-conhub-database = { path = "../ConHub/database" }
-conhub-observability = { path = "../ConHub/shared/observability" }
+# Shared workspace libraries (migrated to shared-middleware-confuse)
+confuse-models = { path = "../shared-middleware-confuse/models" }
+confuse-utils = { path = "../shared-middleware-confuse/utils" }
+confuse-middleware = { path = "../shared-middleware-confuse/middleware" }
+confuse-config = { path = "../shared-middleware-confuse/config" }
+confuse-observability = { path = "../shared-middleware-confuse/observability" }
 
 # Web framework
 actix-web = "4.4"

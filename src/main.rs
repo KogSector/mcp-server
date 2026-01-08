@@ -2,9 +2,9 @@
 // This service implements the Model Context Protocol (MCP) for AI agents
 // It provides tools and resources that agents can use to query ConHub data
 use anyhow::Result;
-use mcp_service::{McpConfig, connectors::ConnectorManager, protocol::McpServer};
+use mcp_service::{McpConfig, connectors::ConnectorManager, protocol::McpServer, db};
 use actix_web::{web, App, HttpResponse, HttpServer};
-use conhub_observability::{init_tracing, TracingConfig, observability, info, warn, error};
+use confuse_observability::{init_tracing, TracingConfig, info};
 
 async fn health() -> HttpResponse {
     HttpResponse::Ok().json(serde_json::json!({
@@ -24,10 +24,10 @@ async fn main() -> Result<()> {
     dotenv::dotenv().ok();
     let config = McpConfig::from_env()?;
 
-    // Initialize database and Redis
-    let db_config = conhub_database::DatabaseConfig::from_env();
+    // Initialize database stub
+    let db_config = db::DatabaseConfig::from_env();
     info!("Initializing database");
-    let database = conhub_database::Database::new(&db_config).await?;
+    let database = db::Database::new(&db_config).await?;
     info!("Database initialized");
 
     // Initialize connector manager

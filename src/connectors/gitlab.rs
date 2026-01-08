@@ -1,10 +1,10 @@
 // GitLab Connector - Stub implementation (similar to GitHub)
 use super::Connector;
 use crate::{context::*, errors::{McpError, McpResult}, protocol::McpTool, security_client::SecurityClient};
+use crate::db::cache::RedisCache;
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::sync::Arc;
-use conhub_database::cache::RedisCache;
 
 pub struct GitLabConnector {
     base_url: String,

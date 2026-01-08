@@ -1,10 +1,10 @@
 // Google Drive Connector - Stub
 use super::Connector;
 use crate::{errors::{McpError, McpResult}, protocol::McpTool, security_client::SecurityClient};
+use crate::db::cache::RedisCache;
 use async_trait::async_trait;
 use serde_json::Value;
 use std::sync::Arc;
-use conhub_database::cache::RedisCache;
 
 pub struct GoogleDriveConnector {
     security: Arc<SecurityClient>,
