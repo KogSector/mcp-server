@@ -1,5 +1,5 @@
-# Multi-stage build for MCP Service
-FROM rust:1.86-slim AS builder
+# Multi-stage build for MCP Service (Rust 1.92)
+FROM rust:1.92-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,9 +11,12 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
+# Copy shared workspace dependencies
+COPY shared-middleware-confuse ../shared-middleware-confuse
+
 # Copy source files
-COPY Cargo.toml Cargo.lock ./
-COPY src ./src
+COPY mcp-server/Cargo.toml mcp-server/Cargo.lock ./
+COPY mcp-server/src ./src
 
 # Build the application
 RUN cargo build --release
@@ -35,7 +38,7 @@ RUN useradd -m -u 1001 conhub
 WORKDIR /app
 
 # Copy the binary from builder
-COPY --from=builder /app/target/release/mcp-server /app/mcp-server
+COPY --from=builder /app/target/release/mcp-service /app/mcp-service
 
 # Set ownership
 RUN chown -R conhub:conhub /app
@@ -48,4 +51,4 @@ EXPOSE 3004
 HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
     CMD curl -f http://localhost:3004/health || exit 1
 
-CMD ["/app/mcp-server"]
+CMD ["/app/mcp-service"]
