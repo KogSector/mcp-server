@@ -9,7 +9,12 @@ pub mod google_drive;
 pub mod dropbox;
 pub mod notion;
 pub mod memory;
+pub mod embeddings;
+pub mod graph;
 
 pub use trait_def::Connector;
 pub use manager::ConnectorManager;
 pub use memory::MemoryConnector;
+pub use embeddings::EmbeddingsConnector;
+pub use graph::GraphConnector;
+

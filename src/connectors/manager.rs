@@ -91,8 +91,20 @@ impl ConnectorManager {
         // Initialize Memory connector (always enabled - this is core functionality)
         let decision_engine_url = std::env::var("DECISION_ENGINE_URL")
             .unwrap_or_else(|_| "http://localhost:3016".to_string());
-        let memory_connector = memory::MemoryConnector::new(decision_engine_url);
+        let memory_connector = memory::MemoryConnector::new(decision_engine_url.clone());
         connectors.insert("memory".to_string(), Arc::new(memory_connector));
+        
+        // Initialize Embeddings connector (always enabled)
+        let embeddings_url = std::env::var("EMBEDDINGS_SERVICE_URL")
+            .unwrap_or_else(|_| "http://localhost:8086".to_string());
+        let embeddings_connector = embeddings::EmbeddingsConnector::new(embeddings_url);
+        connectors.insert("embeddings".to_string(), Arc::new(embeddings_connector));
+        
+        // Initialize Graph connector (always enabled - connects to relation-graph)
+        let relation_graph_url = std::env::var("RELATION_GRAPH_URL")
+            .unwrap_or_else(|_| "http://localhost:3018".to_string());
+        let graph_connector = graph::GraphConnector::new(relation_graph_url);
+        connectors.insert("graph".to_string(), Arc::new(graph_connector));
         
         Ok(Self { connectors })
     }
