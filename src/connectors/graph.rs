@@ -42,7 +42,7 @@ impl Connector for GraphConnector {
             McpTool {
                 name: "graph.search".to_string(),
                 description: "Hybrid semantic + graph search across the knowledge base".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {
                         "query": {
@@ -61,12 +61,12 @@ impl Connector for GraphConnector {
                         }
                     },
                     "required": ["query"]
-                }),
+                })),
             },
             McpTool {
                 name: "graph.traverse".to_string(),
                 description: "Traverse the knowledge graph from a starting entity".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {
                         "entity_id": {
@@ -85,12 +85,12 @@ impl Connector for GraphConnector {
                         }
                     },
                     "required": ["entity_id"]
-                }),
+                })),
             },
             McpTool {
                 name: "graph.get_entity".to_string(),
                 description: "Get details of a specific entity".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {
                         "entity_id": {
@@ -99,23 +99,23 @@ impl Connector for GraphConnector {
                         }
                     },
                     "required": ["entity_id"]
-                }),
+                })),
             },
             McpTool {
                 name: "graph.list_ontologies".to_string(),
                 description: "List available ontologies (entity type schemas)".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {}
-                }),
+                })),
             },
             McpTool {
                 name: "graph.statistics".to_string(),
                 description: "Get knowledge graph statistics".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {}
-                }),
+                })),
             },
         ]
     }

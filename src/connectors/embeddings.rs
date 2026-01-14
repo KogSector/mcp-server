@@ -54,7 +54,7 @@ impl Connector for EmbeddingsConnector {
             McpTool {
                 name: "embeddings.embed".to_string(),
                 description: "Generate embedding vector for a single text".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {
                         "text": {
@@ -63,12 +63,12 @@ impl Connector for EmbeddingsConnector {
                         }
                     },
                     "required": ["text"]
-                }),
+                })),
             },
             McpTool {
                 name: "embeddings.batch_embed".to_string(),
                 description: "Generate embedding vectors for multiple texts".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {
                         "texts": {
@@ -78,19 +78,19 @@ impl Connector for EmbeddingsConnector {
                         }
                     },
                     "required": ["texts"]
-                }),
+                })),
             },
             McpTool {
                 name: "embeddings.similarity".to_string(),
                 description: "Calculate cosine similarity between two texts".to_string(),
-                input_schema: json!({
+                input_schema: Some(json!({
                     "type": "object",
                     "properties": {
                         "text1": { "type": "string" },
                         "text2": { "type": "string" }
                     },
                     "required": ["text1", "text2"]
-                }),
+                })),
             },
         ]
     }

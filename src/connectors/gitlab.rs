@@ -44,7 +44,7 @@ impl Connector for GitLabConnector {
         ]
     }
     
-    async fn call_tool(&self, tool: &str, _args: Value) -> McpResult<Value> {
+    async fn call_tool(&self, _tool: &str, _args: Value) -> McpResult<Value> {
         // Stub implementation - to be completed
         Err(McpError::Internal("GitLab connector not yet fully implemented".to_string()))
     }
