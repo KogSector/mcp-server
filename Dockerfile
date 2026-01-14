@@ -11,12 +11,9 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy shared workspace dependencies
-COPY shared-middleware-confuse ../shared-middleware-confuse
-
 # Copy source files
-COPY mcp-server/Cargo.toml mcp-server/Cargo.lock ./
-COPY mcp-server/src ./src
+COPY Cargo.toml Cargo.lock ./
+COPY src ./src
 
 # Build the application
 RUN cargo build --release
