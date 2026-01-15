@@ -1,5 +1,11 @@
-# Multi-stage build for MCP Service (Rust 1.92)
-FROM rust:1.92-slim AS builder
+# =============================================================================
+# MCP Service - Dockerfile
+# Port: 3004
+# Role: Model Context Protocol server for AI agent connections
+# =============================================================================
+
+# Multi-stage build for MCP Service (Rust 1.84)
+FROM rust:1.84-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
@@ -11,12 +17,18 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /app
 
-# Copy source files
+# Copy manifests for dependency caching
 COPY Cargo.toml Cargo.lock ./
+
+# Create dummy source to cache dependencies
+RUN mkdir src && echo "fn main() {}" > src/main.rs
+RUN cargo build --release || true
+
+# Copy actual source files
 COPY src ./src
 
 # Build the application
-RUN cargo build --release
+RUN touch src/main.rs && cargo build --release
 
 # Runtime stage
 FROM debian:bookworm-slim
