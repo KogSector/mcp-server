@@ -97,14 +97,25 @@ impl ConnectorManager {
         // Initialize Embeddings connector (always enabled)
         let embeddings_url = std::env::var("EMBEDDINGS_SERVICE_URL")
             .unwrap_or_else(|_| "http://localhost:8086".to_string());
-        let embeddings_connector = embeddings::EmbeddingsConnector::new(embeddings_url);
+        let embeddings_connector = embeddings::EmbeddingsConnector::new(embeddings_url.clone());
         connectors.insert("embeddings".to_string(), Arc::new(embeddings_connector));
         
         // Initialize Graph connector (always enabled - connects to relation-graph)
         let relation_graph_url = std::env::var("RELATION_GRAPH_URL")
             .unwrap_or_else(|_| "http://localhost:3018".to_string());
-        let graph_connector = graph::GraphConnector::new(relation_graph_url);
+        let graph_connector = graph::GraphConnector::new(relation_graph_url.clone());
         connectors.insert("graph".to_string(), Arc::new(graph_connector));
+        
+        // Initialize Context connector (hybrid search orchestrator)
+        // Uses embeddings for vector search and relation-graph for graph search
+        let ollama_url = std::env::var("OLLAMA_URL")
+            .unwrap_or_else(|_| "http://ollama-shared:11434".to_string());
+        let context_connector = context::ContextConnector::new(
+            embeddings_url.clone(),
+            relation_graph_url,
+            ollama_url,
+        );
+        connectors.insert("context".to_string(), Arc::new(context_connector));
         
         Ok(Self { connectors })
     }

@@ -43,6 +43,9 @@ GITHUB_TOKEN=ghp_...
 |------|-------------|
 | `confuse.search` | Hybrid search |
 | `confuse.get_entity` | Get entity details |
+| `context.search` | **Hybrid vector + graph search with context assembly** |
+| `context.expand` | Query expansion with semantic terms |
+| `context.related` | Get related entities from knowledge graph |
 | `github.get_file` | Read GitHub file |
 | `fs.read_file` | Read local file |
 

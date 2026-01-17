@@ -11,10 +11,12 @@ pub mod notion;
 pub mod memory;
 pub mod embeddings;
 pub mod graph;
+pub mod context;
 
 pub use trait_def::Connector;
 pub use manager::ConnectorManager;
 pub use memory::MemoryConnector;
 pub use embeddings::EmbeddingsConnector;
 pub use graph::GraphConnector;
+pub use context::ContextConnector;
 
