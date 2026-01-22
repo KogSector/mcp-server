@@ -13,6 +13,10 @@ RUN apt-get update && apt-get install -y \
     libssl-dev \
     libpq-dev \
     curl \
+    cmake \
+    build-essential \
+    libsasl2-dev \
+    librdkafka-dev \
     && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
@@ -39,6 +43,8 @@ RUN apt-get update && apt-get install -y \
     libssl3 \
     libpq5 \
     curl \
+    librdkafka1 \
+    libsasl2-2 \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
