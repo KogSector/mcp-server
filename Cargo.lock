@@ -715,13 +715,16 @@ name = "confuse-config"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chrono",
  "dotenv",
  "lazy_static",
+ "once_cell",
  "parking_lot",
  "reqwest",
  "serde",
  "serde_json",
  "thiserror 1.0.69",
+ "tokio",
  "tracing",
 ]
 
