@@ -3,6 +3,8 @@
 # Port: 3004
 # Role: Model Context Protocol server for AI agent connections
 # =============================================================================
+# Build from workspace root: podman build -f mcp-server/Dockerfile -t confuse/mcp-server .
+# =============================================================================
 
 # Multi-stage build for MCP Service (Rust 1.84)
 FROM rust:1.84-slim AS builder
@@ -19,20 +21,18 @@ RUN apt-get update && apt-get install -y \
     librdkafka-dev \
     && rm -rf /var/lib/apt/lists/*
 
-WORKDIR /app
+WORKDIR /workspace
 
-# Copy manifests for dependency caching
-COPY Cargo.toml Cargo.lock ./
+# Copy shared middleware library first
+COPY shared-middleware-confuse ./shared-middleware-confuse
 
-# Create dummy source to cache dependencies
-RUN mkdir src && echo "fn main() {}" > src/main.rs
-RUN cargo build --release || true
+# Copy mcp-server
+COPY mcp-server ./mcp-server
 
-# Copy actual source files
-COPY src ./src
+WORKDIR /workspace/mcp-server
 
 # Build the application
-RUN touch src/main.rs && cargo build --release
+RUN cargo build --release
 
 # Runtime stage
 FROM debian:bookworm-slim
@@ -53,7 +53,7 @@ RUN useradd -m -u 1001 conhub
 WORKDIR /app
 
 # Copy the binary from builder
-COPY --from=builder /app/target/release/mcp-service /app/mcp-service
+COPY --from=builder /workspace/mcp-server/target/release/mcp-service /app/mcp-service
 
 # Set ownership
 RUN chown -R conhub:conhub /app
