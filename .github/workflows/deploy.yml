@@ -1,0 +1,123 @@
+name: Deploy MCP Server
+
+on:
+  push:
+    branches: [ main, develop ]
+    paths: [ 'mcp-server/**' ]
+  pull_request:
+    branches: [ main ]
+    paths: [ 'mcp-server/**' ]
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: mcp-server
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./mcp-server
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup Rust
+      uses: dtolnay/rust-toolchain@stable
+      with:
+        components: rustfmt, clippy
+
+    - name: Cache Rust dependencies
+      uses: actions/cache@v3
+      with:
+        path: |
+          ~/.cargo/registry
+          ~/.cargo/git
+          target
+        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+
+    - name: Install dependencies
+      run: cargo fetch
+
+    - name: Format check
+      run: cargo fmt -- --check
+
+    - name: Clippy check
+      run: cargo clippy -- -D warnings
+
+    - name: Run tests
+      run: cargo test
+
+    - name: Build
+      run: cargo build --release
+
+  build-and-deploy:
+    needs: test
+    runs-on: ubuntu-latest
+    if: github.ref == 'refs/heads/main'
+    
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Log in to Container Registry
+      uses: docker/login-action@v3
+      with:
+        registry: ${{ env.REGISTRY }}
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Extract metadata
+      id: meta
+      uses: docker/metadata-action@v5
+      with:
+        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+        tags: |
+          type=ref,event=branch
+          type=ref,event=pr
+          type=sha,prefix={{branch}}-
+          type=raw,value=latest,enable={{is_default_branch}}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: ./mcp-server
+        push: true
+        tags: ${{ steps.meta.outputs.tags }}
+        labels: ${{ steps.meta.outputs.labels }}
+        cache-from: type=gha
+        cache-to: type=gha,mode=max
+
+    - name: Deploy to Cloud Run
+      uses: google-github-actions/auth@v2
+      with:
+        credentials_json: ${{ secrets.GCP_SA_KEY }}
+    
+    - name: Deploy to Cloud Run
+      run: |
+        gcloud run deploy ${{ env.IMAGE_NAME }} \
+          --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
+          --region ${{ secrets.GCP_REGION }} \
+          --allow-unauthenticated \
+          --set-env-vars MCP_PORT=3004 \
+          --set-env-vars EMBEDDINGS_SERVICE_URL=${{ secrets.EMBEDDINGS_SERVICE_URL }} \
+          --set-env-vars RELATION_GRAPH_URL=${{ secrets.RELATION_GRAPH_URL }} \
+          --set-env-vars DECISION_ENGINE_URL=${{ secrets.DECISION_ENGINE_URL }} \
+          --set-env-vars OLLAMA_URL=${{ secrets.OLLAMA_URL }} \
+          --set-env-vars GITHUB_API_BASE=${{ secrets.GITHUB_API_BASE }} \
+          --set-env-vars GITLAB_BASE_URL=${{ secrets.GITLAB_BASE_URL }} \
+          --set-env-vars BITBUCKET_BASE_URL=${{ secrets.BITBUCKET_BASE_URL }} \
+          --set-env-vars FS_ROOT_PATHS=${{ secrets.FS_ROOT_PATHS }} \
+          --set-env-vars ENABLE_GITHUB=${{ secrets.ENABLE_GITHUB }} \
+          --set-env-vars ENABLE_GITLAB=${{ secrets.ENABLE_GITLAB }} \
+          --set-env-vars ENABLE_BITBUCKET=${{ secrets.ENABLE_BITBUCKET }} \
+          --set-env-vars ENABLE_GDRIVE=${{ secrets.ENABLE_GDRIVE }} \
+          --set-env-vars ENABLE_DROPBOX=${{ secrets.ENABLE_DROPBOX }} \
+          --set-env-vars ENABLE_FS=${{ secrets.ENABLE_FS }} \
+          --set-env-vars ENABLE_NOTION=${{ secrets.ENABLE_NOTION }} \
+          --set-env-vars REQUEST_TIMEOUT_SECS=${{ secrets.REQUEST_TIMEOUT_SECS }} \
+          --set-env-vars CACHE_TTL_SECS=${{ secrets.CACHE_TTL_SECS }} \
+          --set-env-vars RATE_LIMIT_PER_MINUTE=${{ secrets.RATE_LIMIT_PER_MINUTE }} \
+          --set-cloud-run-keywords=confuse,mcp-server
