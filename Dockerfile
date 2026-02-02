@@ -45,6 +45,7 @@ RUN apt-get update && apt-get install -y \
     curl \
     librdkafka1 \
     libsasl2-2 \
+    dumb-init \
     && rm -rf /var/lib/apt/lists/*
 
 # Create non-root user
@@ -62,8 +63,11 @@ USER conhub
 
 EXPOSE 3004
 
-# Health check
-HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+# Health check optimized for Azure Container Apps
+HEALTHCHECK --interval=30s --timeout=10s --start-period=60s --retries=3 \
     CMD curl -f http://localhost:3004/health || exit 1
+
+# Use dumb-init as PID 1 for proper signal handling
+ENTRYPOINT ["dumb-init", "--"]
 
 CMD ["/app/mcp-service"]
