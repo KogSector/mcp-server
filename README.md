@@ -42,7 +42,7 @@ ENABLE_GITHUB=true
 GITHUB_TOKEN=ghp_...
 
 # Context Connector (Hybrid Search)
-EMBEDDINGS_URL=http://embeddings:3001
+EMBEDDINGS_URL=http://embeddings:3011
 RELATION_GRAPH_URL=http://relation-graph:3003
 OLLAMA_URL=http://ollama:11434
 ```
