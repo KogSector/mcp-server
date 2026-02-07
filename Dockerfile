@@ -6,8 +6,8 @@
 # Build from workspace root: podman build -f mcp-server/Dockerfile -t confuse/mcp-server .
 # =============================================================================
 
-# Multi-stage build for MCP Service (Rust 1.84 stable)
-FROM rust:1.84.0-slim AS builder
+# Multi-stage build for MCP Service (Rust 1.92 stable)
+FROM rust:1.92.0-slim AS builder
 
 # Install build dependencies
 RUN apt-get update && apt-get install -y \
