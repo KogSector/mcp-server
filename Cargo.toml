@@ -8,12 +8,8 @@ name = "mcp-service"
 path = "src/main.rs"
 
 [dependencies]
-# Shared workspace libraries (migrated to shared-middleware-confuse)
-confuse-models = { path = "../shared-middleware-confuse/models" }
-confuse-utils = { path = "../shared-middleware-confuse/utils" }
-confuse-middleware = { path = "../shared-middleware-confuse/middleware" }
-confuse-config = { path = "../shared-middleware-confuse/config" }
-confuse-observability = { path = "../shared-middleware-confuse/observability" }
+# Unified shared library
+confuse-common = { path = "../shared-middleware/rust/confuse-common", features = ["actix"] }
 
 # Web framework
 actix-web = "4.4"

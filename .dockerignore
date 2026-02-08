@@ -1,54 +1,14 @@
-# =============================================================================
-# Docker Ignore - Rust Service
-# =============================================================================
+# Rust Service .dockerignore
+# Ignore everything by default
+**
 
-# Git
-.git
-.gitignore
-.gitattributes
+# Allow build context essentials
+!mcp-server/
+!shared/
+!Cargo.toml
+!Cargo.lock
 
-# Environment files (NEVER include in images)
-.env
-.env.*
-*.env
-.env.local
-.env.development
-.env.production
-
-# IDE/Editor
-.vscode
-.idea
-*.swp
-*.swo
-*~
-
-# Rust build artifacts
-target/
-**/*.rs.bk
-Cargo.lock
-
-# Documentation
-docs/
-*.md
-!README.md
-LICENSE
-
-# Tests (not needed in production image)
-tests/
-test/
-*_test.rs
-
-# CI/CD
-.github/
-.gitlab-ci.yml
-.dockerignore
-Dockerfile*
-
-# Logs
-*.log
-logs/
-
-# Temporary files
-tmp/
-temp/
-*.tmp
+# Specific ignores within allowed directories
+mcp-server/target
+mcp-server/.env
+shared/target

@@ -23,8 +23,8 @@ RUN apt-get update && apt-get install -y \
 
 WORKDIR /workspace
 
-# Copy shared middleware library first
-COPY shared-middleware-confuse ./shared-middleware-confuse
+COPY shared-middleware ./shared-middleware
+
 
 # Copy mcp-server
 COPY mcp-server ./mcp-server
