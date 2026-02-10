@@ -1,7 +1,7 @@
 // GitHub Connector - Full implementation
 use super::Connector;
 use crate::{context::*, errors::{McpError, McpResult}, protocol::McpTool, security_client::SecurityClient};
-use crate::db::cache::RedisCache;
+
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -10,7 +10,7 @@ use std::sync::Arc;
 pub struct GitHubConnector {
     api_base: String,
     security: Arc<SecurityClient>,
-    cache: Option<RedisCache>,
+
     client: reqwest::Client,
 }
 
@@ -56,7 +56,7 @@ struct GitHubContent {
 }
 
 impl GitHubConnector {
-    pub fn new(api_base: String, security: Arc<SecurityClient>, cache: Option<RedisCache>) -> Self {
+    pub fn new(api_base: String, security: Arc<SecurityClient>) -> Self {
         Self {
             api_base,
             security,

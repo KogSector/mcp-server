@@ -26,6 +26,17 @@ pub struct McpConfig {
     
     // Rate limiting
     pub rate_limit_per_minute: u32,
+
+    // Storage backends for hybrid retrieval
+    pub zilliz_endpoint: Option<String>,
+    pub zilliz_token: Option<String>,
+    pub zilliz_collection_name: String,
+    pub azure_blob_connection_string: Option<String>,
+    pub azure_blob_container: String,
+    pub neo4j_uri: Option<String>,
+    pub neo4j_user: String,
+    pub neo4j_password: Option<String>,
+    pub embeddings_service_url: Option<String>,
 }
 
 impl McpConfig {
@@ -67,13 +78,26 @@ impl McpConfig {
             rate_limit_per_minute: std::env::var("RATE_LIMIT_PER_MINUTE")
                 .unwrap_or_else(|_| "60".to_string())
                 .parse()?,
+
+            // Storage backends
+            zilliz_endpoint: std::env::var("ZILLIZ_ENDPOINT").ok(),
+            zilliz_token: std::env::var("ZILLIZ_TOKEN").ok(),
+            zilliz_collection_name: std::env::var("ZILLIZ_COLLECTION_NAME")
+                .unwrap_or_else(|_| "confuse_embeddings".to_string()),
+            azure_blob_connection_string: std::env::var("AZURE_BLOB_CONNECTION_STRING").ok(),
+            azure_blob_container: std::env::var("AZURE_BLOB_CONTAINER")
+                .unwrap_or_else(|_| "confuse-chunks".to_string()),
+            neo4j_uri: std::env::var("NEO4J_URI").ok(),
+            neo4j_user: std::env::var("NEO4J_USER")
+                .unwrap_or_else(|_| "neo4j".to_string()),
+            neo4j_password: std::env::var("NEO4J_PASSWORD").ok(),
+            embeddings_service_url: std::env::var("EMBEDDINGS_SERVICE_URL").ok(),
         })
     }
     
     fn parse_enabled_connectors() -> HashMap<String, bool> {
         let mut enabled = HashMap::new();
         
-        // Default all to true unless explicitly disabled
         let connectors = vec!["github", "gitlab", "bitbucket", "gdrive", "dropbox", "fs", "notion"];
         
         for connector in connectors {

@@ -40,8 +40,13 @@ sqlx = { version = "0.7", features = ["runtime-tokio-rustls", "postgres", "chron
 uuid = { version = "1.6", features = ["v4", "serde"] }
 chrono = { version = "0.4", features = ["serde"] }
 
-# HTTP client
+# HTTP client (for Zilliz REST API, Azure Blob REST API, embeddings-service)
 reqwest = { version = "0.11", features = ["json"] }
+
+# Azure Blob auth
+sha2 = "0.10"
+base64 = "0.22"
+hmac = "0.12"
 
 # Configuration
 dotenv = "0.15"

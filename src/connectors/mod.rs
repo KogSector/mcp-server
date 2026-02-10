@@ -12,6 +12,8 @@ pub mod memory;
 pub mod embeddings;
 pub mod graph;
 pub mod context;
+pub mod milvus_search;
+pub mod blob_retrieval;
 
 pub use trait_def::Connector;
 pub use manager::ConnectorManager;
@@ -19,4 +21,5 @@ pub use memory::MemoryConnector;
 pub use embeddings::EmbeddingsConnector;
 pub use graph::GraphConnector;
 pub use context::ContextConnector;
-
+pub use milvus_search::MilvusSearchConnector;
+pub use blob_retrieval::BlobRetrievalConnector;

@@ -1,7 +1,6 @@
 // Bitbucket Connector - Stub implementation
 use super::Connector;
 use crate::{context::*, errors::{McpError, McpResult}, protocol::McpTool, security_client::SecurityClient};
-use crate::db::cache::RedisCache;
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -9,12 +8,11 @@ use std::sync::Arc;
 pub struct BitbucketConnector {
     base_url: String,
     security: Arc<SecurityClient>,
-    cache: Option<RedisCache>,
 }
 
 impl BitbucketConnector {
-    pub fn new(base_url: String, security: Arc<SecurityClient>, cache: Option<RedisCache>) -> Self {
-        Self { base_url, security, cache }
+    pub fn new(base_url: String, security: Arc<SecurityClient>) -> Self {
+        Self { base_url, security }
     }
 }
 

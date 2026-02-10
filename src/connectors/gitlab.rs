@@ -1,7 +1,6 @@
 // GitLab Connector - Stub implementation (similar to GitHub)
 use super::Connector;
 use crate::{context::*, errors::{McpError, McpResult}, protocol::McpTool, security_client::SecurityClient};
-use crate::db::cache::RedisCache;
 use async_trait::async_trait;
 use serde_json::{json, Value};
 use std::sync::Arc;
@@ -9,12 +8,11 @@ use std::sync::Arc;
 pub struct GitLabConnector {
     base_url: String,
     security: Arc<SecurityClient>,
-    cache: Option<RedisCache>,
 }
 
 impl GitLabConnector {
-    pub fn new(base_url: String, security: Arc<SecurityClient>, cache: Option<RedisCache>) -> Self {
-        Self { base_url, security, cache }
+    pub fn new(base_url: String, security: Arc<SecurityClient>) -> Self {
+        Self { base_url, security }
     }
 }
 
@@ -45,7 +43,6 @@ impl Connector for GitLabConnector {
     }
     
     async fn call_tool(&self, _tool: &str, _args: Value) -> McpResult<Value> {
-        // Stub implementation - to be completed
         Err(McpError::Internal("GitLab connector not yet fully implemented".to_string()))
     }
 }
