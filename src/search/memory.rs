@@ -1,31 +1,31 @@
-//! Memory Connector for MCP
+//! Memory Search Service for MCP
 //! 
 //! Exposes ConHub's knowledge layer and memory system to AI agents via MCP tools.
 //! This is the primary interface for AI agents to query the knowledge layer.
 
 use crate::{
-    context::*,
+    search::*,
     errors::{McpError, McpResult},
-    protocol::McpTool,
+    mcp::McpTool,
 };
 use async_trait::async_trait;
-use serde::{Deserialize, Serialize};
+use serde::Serialize;
 use serde_json::{json, Value};
-use tracing::{info, error, debug};
+use tracing::{info, debug};
 
-/// Memory connector for MCP
+/// Memory search service for MCP
 /// 
 /// Provides tools for AI agents to:
 /// - Search the knowledge layer (code, docs, chat, tickets)
 /// - Search robot memory (episodic and semantic)
 /// - Get robot context snapshots
 /// - Store passive context
-pub struct MemoryConnector {
+pub struct MemoryService {
     decision_engine_url: String,
     http_client: reqwest::Client,
 }
 
-impl MemoryConnector {
+impl MemoryService {
     pub fn new(decision_engine_url: String) -> Self {
         Self {
             decision_engine_url,
@@ -115,7 +115,7 @@ impl MemoryConnector {
 }
 
 #[async_trait]
-impl super::Connector for MemoryConnector {
+impl super::service_trait::SearchService for MemoryService {
     fn id(&self) -> &'static str {
         "memory"
     }

@@ -1,20 +1,20 @@
-// Connector Trait - Common interface for all connectors
-use crate::{context::*, protocol::McpTool, errors::McpResult};
+// Search Service Trait - Common interface for all search and retrieval services
+use crate::{search::*, mcp::McpTool, errors::McpResult};
 use async_trait::async_trait;
 use serde_json::Value;
 
 #[async_trait]
-pub trait Connector: Send + Sync {
-    /// Connector identifier (github, gitlab, bitbucket, etc.)
+pub trait SearchService: Send + Sync {
+    /// Service identifier (embeddings, graph, blob, etc.)
     fn id(&self) -> &'static str;
     
-    /// List all tools this connector exposes
+    /// List all tools this service exposes
     fn list_tools(&self) -> Vec<McpTool>;
     
     /// Call a tool with arguments
     async fn call_tool(&self, tool: &str, args: Value) -> McpResult<Value>;
     
-    /// Optional: List resources (for browsable connectors)
+    /// Optional: List resources (for browsable services)
     fn list_resources(&self) -> Vec<ResourceDescriptor> {
         vec![]
     }

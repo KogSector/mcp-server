@@ -23,12 +23,12 @@
 //! Graph adds: config.rs (imports), auth_test.rs (tests), auth.md (docs)
 //! Result: Complete context for the AI agent
 
-use crate::{protocol::McpTool, errors::{McpError, McpResult}};
+use crate::{mcp::McpTool, errors::{McpError, McpResult}};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::collections::HashMap;
-use super::Connector;
+use super::service_trait::SearchService;
 
 /// Configuration for hybrid search ranking
 #[derive(Debug, Clone)]
@@ -57,8 +57,8 @@ impl Default for RankingWeights {
     }
 }
 
-/// Context Connector for hybrid search
-pub struct ContextConnector {
+/// Hybrid Search Service - Combines embeddings and graph search
+pub struct HybridSearchService {
     embeddings_url: String,
     graph_url: String,
     ollama_url: String,
@@ -68,7 +68,7 @@ pub struct ContextConnector {
     max_results: usize,
 }
 
-impl ContextConnector {
+impl HybridSearchService {
     pub fn new(
         embeddings_url: String,
         graph_url: String,
@@ -463,7 +463,7 @@ struct ContextItem {
 // =============================================================================
 
 #[async_trait]
-impl Connector for ContextConnector {
+impl SearchService for HybridSearchService {
     fn id(&self) -> &'static str {
         "context"
     }

@@ -8,14 +8,14 @@ use chrono::Utc;
 use hmac::{Hmac, Mac};
 use sha2::Sha256;
 
-pub struct BlobRetrievalConnector {
+pub struct BlobRetrievalService {
     client: reqwest::Client,
     account_name: String,
     account_key: String,
     container_name: String,
 }
 
-impl BlobRetrievalConnector {
+impl BlobRetrievalService {
     pub fn from_connection_string(connection_string: &str, container_name: &str) -> Result<Self> {
         let mut account_name = String::new();
         let mut account_key = String::new();

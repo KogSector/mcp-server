@@ -1,16 +1,16 @@
-// Embeddings Connector - Direct access to embeddings service
-use crate::{context::*, protocol::McpTool, errors::{McpError, McpResult}};
+// Embeddings Search Service - Direct access to embeddings service
+use crate::{search::*, mcp::McpTool, errors::{McpError, McpResult}};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use super::Connector;
+use super::service_trait::SearchService;
 
-pub struct EmbeddingsConnector {
+pub struct EmbeddingsService {
     base_url: String,
     client: reqwest::Client,
 }
 
-impl EmbeddingsConnector {
+impl EmbeddingsService {
     pub fn new(base_url: String) -> Self {
         Self {
             base_url,
@@ -44,7 +44,7 @@ struct BatchEmbedResponse {
 }
 
 #[async_trait]
-impl Connector for EmbeddingsConnector {
+impl SearchService for EmbeddingsService {
     fn id(&self) -> &'static str {
         "embeddings"
     }

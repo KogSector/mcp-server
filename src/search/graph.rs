@@ -1,16 +1,16 @@
-// Graph Connector - Direct access to relation-graph knowledge layer
-use crate::{context::*, protocol::McpTool, errors::{McpError, McpResult}};
+// Graph Search Service - Direct access to knowledge graph knowledge layer
+use crate::{search::*, mcp::McpTool, errors::{McpError, McpResult}};
 use async_trait::async_trait;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
-use super::Connector;
+use super::service_trait::SearchService;
 
-pub struct GraphConnector {
+pub struct GraphSearchService {
     base_url: String,
     client: reqwest::Client,
 }
 
-impl GraphConnector {
+impl GraphSearchService {
     pub fn new(base_url: String) -> Self {
         Self {
             base_url,
@@ -32,7 +32,7 @@ struct EntityResponse {
 }
 
 #[async_trait]
-impl Connector for GraphConnector {
+impl SearchService for GraphSearchService {
     fn id(&self) -> &'static str {
         "graph"
     }

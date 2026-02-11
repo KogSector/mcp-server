@@ -1,8 +1,8 @@
 // MCP Server - JSON-RPC handler
 use crate::{
     config::McpConfig,
-    connectors::ConnectorManager,
-    protocol::types::*,
+    search::SearchManager,
+    mcp::types::*,
     errors::{McpError, McpResult},
 };
 use anyhow::Result;
@@ -11,14 +11,14 @@ use tokio::io::{AsyncBufReadExt, AsyncWriteExt, BufReader};
 use tracing::{info, error, debug};
 
 pub struct McpServer {
-    connector_manager: ConnectorManager,
+    search_manager: SearchManager,
     config: McpConfig,
 }
 
 impl McpServer {
-    pub fn new(connector_manager: ConnectorManager, config: McpConfig) -> Self {
+    pub fn new(search_manager: SearchManager, config: McpConfig) -> Self {
         Self {
-            connector_manager,
+            search_manager,
             config,
         }
     }
@@ -26,7 +26,7 @@ impl McpServer {
     pub async fn run(mut self) -> Result<()> {
         info!("🔗 ConHub MCP Server starting on stdio");
         info!("📡 Model Context Protocol ready");
-        info!("🔌 {} connectors enabled", self.connector_manager.connector_count());
+        info!("🔌 {} search services enabled", self.search_manager.service_count());
         
         let stdin = tokio::io::stdin();
         let mut stdout = tokio::io::stdout();
@@ -134,7 +134,7 @@ impl McpServer {
     }
     
     async fn list_tools(&self) -> McpResult<Value> {
-        let tools = self.connector_manager.list_all_tools();
+        let tools = self.search_manager.list_all_tools();
         Ok(json!({ "tools": tools }))
     }
     
@@ -143,7 +143,7 @@ impl McpServer {
             params.ok_or_else(|| McpError::InvalidArguments("Missing params".to_string()))?
         )?;
         
-        let result = self.connector_manager
+        let result = self.search_manager
             .call_tool(&call_request.name, call_request.arguments)
             .await?;
         
@@ -152,7 +152,7 @@ impl McpServer {
     }
     
     async fn list_resources(&self) -> McpResult<Value> {
-        let resources = self.connector_manager.list_all_resources();
+        let resources = self.search_manager.list_all_resources();
         Ok(json!({ "resources": resources }))
     }
     
@@ -162,7 +162,7 @@ impl McpServer {
             params.get("uri").cloned().ok_or_else(|| McpError::InvalidArguments("Missing uri".to_string()))?
         )?;
         
-        let content = self.connector_manager.read_resource(&resource_id).await?;
+        let content = self.search_manager.read_resource(&resource_id).await?;
         Ok(serde_json::to_value(content)?)
     }
     

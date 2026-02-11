@@ -1,10 +1,11 @@
 // MCP Service Main Entry Point
 // This service implements the Model Context Protocol (MCP) for AI agents
-// It provides tools and resources that agents can use to query ConHub data
+// It provides intelligent search and retrieval tools that query the knowledge graph
+// and fetch content from Azure Blob Storage based on search results
 use anyhow::Result;
-use mcp_service::{McpConfig, connectors::ConnectorManager, protocol::McpServer, db};
+use mcp_service::{McpConfig, search::SearchManager, mcp::McpServer, db};
 use actix_web::{web, App, HttpResponse, HttpServer};
-use confuse_observability::{init_tracing, TracingConfig, info};
+use tracing::info;
 
 async fn health() -> HttpResponse {
     HttpResponse::Ok().json(serde_json::json!({
@@ -15,8 +16,10 @@ async fn health() -> HttpResponse {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    // Initialize observability with structured logging
-    init_tracing(TracingConfig::for_service("mcp-service"));
+    // Initialize structured logging
+    tracing_subscriber::fmt()
+        .with_max_level(tracing::Level::INFO)
+        .init();
 
     info!("Starting ConHub MCP Service");
 
@@ -30,12 +33,12 @@ async fn main() -> Result<()> {
     let database = db::Database::new(&db_config).await?;
     info!("Database initialized");
 
-    // Initialize connector manager
-    let connector_manager = ConnectorManager::new(database, &config).await?;
+    // Initialize search and retrieval manager
+    let search_manager = SearchManager::new(database, &config).await?;
 
     info!(
-        connectors = connector_manager.connector_count(),
-        "Initialized connectors"
+        services = search_manager.service_count(),
+        "Initialized search and retrieval services"
     );
 
     // Start minimal HTTP server for health checks only
@@ -56,7 +59,7 @@ async fn main() -> Result<()> {
     });
 
     // Start MCP server on stdio (main protocol)
-    let server = McpServer::new(connector_manager, config);
+    let server = McpServer::new(search_manager, config);
     let mcp_handle = tokio::spawn(async move {
         match server.run().await {
             Ok(_) => {
@@ -71,7 +74,7 @@ async fn main() -> Result<()> {
     tracing::info!("✅ MCP service running");
     tracing::info!("   MCP Protocol: stdio");
     tracing::info!("   Health Check: http://0.0.0.0:{}", port_num);
-    tracing::info!("   Tools: vector_search, graph_query, data_fetch");
+    tracing::info!("   Tools: context_search, graph_query, embeddings_search, blob_retrieval");
     
     // Keep service running as long as HTTP health server is alive
     // Continue even if MCP stdio server exits (e.g., no attached client)
