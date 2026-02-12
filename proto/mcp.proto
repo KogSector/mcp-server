@@ -1,0 +1,51 @@
+syntax = "proto3";
+
+package confuse.mcp.v1;
+
+// MCP service - internal MCP tool implementations
+service Mcp {
+  // Tool operations (called by client-connector)
+  rpc ListTools(ListToolsRequest) returns (ListToolsResponse);
+  rpc CallTool(CallToolRequest) returns (CallToolResponse);
+  rpc GetToolSchema(ToolSchemaRequest) returns (ToolSchema);
+}
+
+// Messages
+message ListToolsRequest {
+  optional string category = 1;
+}
+
+message Tool {
+  string tool_id = 1;
+  string name = 2;
+  string description = 3;
+  string category = 4;
+  map<string, string> parameters_schema = 5;
+}
+
+message ListToolsResponse {
+  repeated Tool tools = 1;
+}
+
+message CallToolRequest {
+  string tool_id = 1;
+  map<string, string> parameters = 2;
+  string user_id = 3;
+  string session_id = 4;
+}
+
+message CallToolResponse {
+  bool success = 1;
+  string result = 2;
+  optional string error = 3;
+  map<string, string> metadata = 4;
+}
+
+message ToolSchemaRequest {
+  string tool_id = 1;
+}
+
+message ToolSchema {
+  string tool_id = 1;
+  string json_schema = 2;
+}
