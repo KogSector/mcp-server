@@ -9,7 +9,7 @@ path = "src/main.rs"
 
 [dependencies]
 # Unified shared library
-confuse-common = { path = "../shared-middleware/rust/confuse-common", features = ["actix"] }
+confuse-common = { path = "../shared-middleware", features = ["actix"] }
 
 # Web framework
 actix-web = "4.4"
