@@ -1,50 +1,7 @@
 # =============================================================================
 # MCP Server - Kubernetes Deployment
-# Covers ALL .env variables via ConfigMap (non-sensitive) + Secret (sensitive)
+# Uses dynamically generated Secret from .env file via CI/CD
 # =============================================================================
-
----
-apiVersion: v1
-kind: ConfigMap
-metadata:
-  name: mcp-server-config
-  namespace: confuse-platform
-data:
-  SERVICE_NAME: "mcp-server"
-  PORT: "3004"
-  MCP_SERVICE_PORT: "3004"
-  GRPC_ENABLED: "false"
-  GRPC_PORT: "50056"
-  HOST: "0.0.0.0"
-  ENVIRONMENT: "production"
-  # Ollama (Optional)
-  OLLAMA_URL: "http://ollama:11434"
-  # Azure Blob Storage (non-sensitive)
-  AZURE_BLOB_CONTAINER: "confuse-files"
-  # Configuration
-  REQUEST_TIMEOUT_SECS: "30"
-  CACHE_TTL_SECS: "300"
-  RATE_LIMIT_PER_MINUTE: "60"
-  # Downstream Services
-  EMBEDDINGS_SERVICE_URL: "http://embeddings-service:3011"
-  RELATION_GRAPH_URL: "http://relation-graph:3003"
-  DECISION_ENGINE_URL: "http://decision-engine:3005"
-
----
-apiVersion: v1
-kind: Secret
-metadata:
-  name: mcp-server-secrets
-  namespace: confuse-platform
-type: Opaque
-stringData:
-  # Database (REQUIRED)
-  DATABASE_URL: "CHANGEME_postgresql://user:pass@host:5432/confuse_mcp?sslmode=require"
-  # ChromaDB (Optional)
-  CHROMA_API_KEY: "CHANGEME_CHROMA_API_KEY"
-  CHROMA_COLLECTION_ID: "CHANGEME_CHROMA_COLLECTION_ID"
-  # Azure Blob Storage
-  AZURE_BLOB_CONNECTION_STRING: "CHANGEME_AZURE_BLOB_CONNECTION"
 
 ---
 apiVersion: apps/v1
@@ -76,8 +33,6 @@ spec:
         - containerPort: 3004
           name: http
         envFrom:
-        - configMapRef:
-            name: mcp-server-config
         - secretRef:
             name: mcp-server-secrets
         resources:

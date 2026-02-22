@@ -2,122 +2,91 @@ name: Deploy MCP Server
 
 on:
   push:
-    branches: [ main, develop ]
-    paths: [ 'mcp-server/**' ]
+    branches: [main]
+    paths: ['mcp-server/**']
   pull_request:
-    branches: [ main ]
-    paths: [ 'mcp-server/**' ]
+    branches: [main]
+    paths: ['mcp-server/**']
   workflow_dispatch:
 
 env:
-  REGISTRY: ghcr.io
-  IMAGE_NAME: mcp-server
+  SERVICE_NAME: mcp-server
+  DOCKERFILE: Dockerfile
 
 jobs:
-  test:
+  build-and-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./mcp-server
-    
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Setup Rust
-      uses: dtolnay/rust-toolchain@stable
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
       with:
-        components: rustfmt, clippy
-
-    - name: Cache Rust dependencies
-      uses: actions/cache@v3
-      with:
-        path: |
-          ~/.cargo/registry
-          ~/.cargo/git
-          target
-        key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+        node-version: '22'
 
     - name: Install dependencies
-      run: cargo fetch
-
-    - name: Format check
-      run: cargo fmt -- --check
-
-    - name: Clippy check
-      run: cargo clippy -- -D warnings
-
-    - name: Run tests
-      run: cargo test
+      run: npm install
 
     - name: Build
-      run: cargo build --release
+      run: npm run build
 
-  build-and-deploy:
-    needs: test
+  deploy:
+    needs: build-and-test
     runs-on: ubuntu-latest
-    if: github.ref == 'refs/heads/main'
-    
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
 
-    - name: Log in to Container Registry
-      uses: docker/login-action@v3
+    - name: Azure Login
+      uses: azure/login@v2
       with:
-        registry: ${{ env.REGISTRY }}
-        username: ${{ github.actor }}
-        password: ${{ secrets.GITHUB_TOKEN }}
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
 
-    - name: Extract metadata
-      id: meta
-      uses: docker/metadata-action@v5
+    - name: Login to ACR
+      uses: azure/docker-login@v2
       with:
-        images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
-        tags: |
-          type=ref,event=branch
-          type=ref,event=pr
-          type=sha,prefix={{branch}}-
-          type=raw,value=latest,enable={{is_default_branch}}
+        login-server: ${{ secrets.ACR_LOGIN_SERVER }}
+        username: ${{ secrets.ACR_USERNAME }}
+        password: ${{ secrets.ACR_PASSWORD }}
 
-    - name: Build and push Docker image
-      uses: docker/build-push-action@v5
-      with:
-        context: ./mcp-server
-        push: true
-        tags: ${{ steps.meta.outputs.tags }}
-        labels: ${{ steps.meta.outputs.labels }}
-        cache-from: type=gha
-        cache-to: type=gha,mode=max
-
-    - name: Deploy to Cloud Run
-      uses: google-github-actions/auth@v2
-      with:
-        credentials_json: ${{ secrets.GCP_SA_KEY }}
-    
-    - name: Deploy to Cloud Run
+    - name: Build and push image
       run: |
-        gcloud run deploy ${{ env.IMAGE_NAME }} \
-          --image ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ github.sha }} \
-          --region ${{ secrets.GCP_REGION }} \
-          --allow-unauthenticated \
-          --set-env-vars MCP_PORT=3004 \
-          --set-env-vars EMBEDDINGS_SERVICE_URL=${{ secrets.EMBEDDINGS_SERVICE_URL }} \
-          --set-env-vars RELATION_GRAPH_URL=${{ secrets.RELATION_GRAPH_URL }} \
-          --set-env-vars DECISION_ENGINE_URL=${{ secrets.DECISION_ENGINE_URL }} \
-          --set-env-vars OLLAMA_URL=${{ secrets.OLLAMA_URL }} \
-          --set-env-vars GITHUB_API_BASE=${{ secrets.GITHUB_API_BASE }} \
-          --set-env-vars GITLAB_BASE_URL=${{ secrets.GITLAB_BASE_URL }} \
-          --set-env-vars BITBUCKET_BASE_URL=${{ secrets.BITBUCKET_BASE_URL }} \
-          --set-env-vars FS_ROOT_PATHS=${{ secrets.FS_ROOT_PATHS }} \
-          --set-env-vars ENABLE_GITHUB=${{ secrets.ENABLE_GITHUB }} \
-          --set-env-vars ENABLE_GITLAB=${{ secrets.ENABLE_GITLAB }} \
-          --set-env-vars ENABLE_BITBUCKET=${{ secrets.ENABLE_BITBUCKET }} \
-          --set-env-vars ENABLE_GDRIVE=${{ secrets.ENABLE_GDRIVE }} \
-          --set-env-vars ENABLE_DROPBOX=${{ secrets.ENABLE_DROPBOX }} \
-          --set-env-vars ENABLE_FS=${{ secrets.ENABLE_FS }} \
-          --set-env-vars ENABLE_NOTION=${{ secrets.ENABLE_NOTION }} \
-          --set-env-vars REQUEST_TIMEOUT_SECS=${{ secrets.REQUEST_TIMEOUT_SECS }} \
-          --set-env-vars CACHE_TTL_SECS=${{ secrets.CACHE_TTL_SECS }} \
-          --set-env-vars RATE_LIMIT_PER_MINUTE=${{ secrets.RATE_LIMIT_PER_MINUTE }} \
-          --set-cloud-run-keywords=confuse,mcp-server
+        IMAGE_TAG="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+        IMAGE_LATEST="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:latest"
+        docker build -f ${{ env.DOCKERFILE }} -t $IMAGE_TAG -t $IMAGE_LATEST .
+        docker push $IMAGE_TAG
+        docker push $IMAGE_LATEST
+
+    - name: Set AKS context
+      uses: azure/aks-set-context@v4
+      with:
+        resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+        cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+
+    - name: Update K8s deployment image
+      run: |
+        IMAGE_TAG="${{ secrets.ACR_LOGIN_SERVER }}/${{ env.SERVICE_NAME }}:${{ github.sha }}"
+        kubectl set image deployment/${{ env.SERVICE_NAME }} \
+          ${{ env.SERVICE_NAME }}=$IMAGE_TAG \
+          -n confuse-platform
+
+    - name: Create K8s Secret from .env
+      run: |
+        kubectl create namespace confuse-platform --dry-run=client -o yaml | kubectl apply -f -
+        kubectl create secret generic ${{ env.SERVICE_NAME }}-secrets \
+          --from-env-file=.env \
+          --namespace confuse-platform \
+          --dry-run=client -o yaml | kubectl apply -f -
+
+    - name: Apply K8s deployment file
+      run: |
+        kubectl apply -f .github/deployment.yaml
+
+    - name: Verify deployment
+      run: |
+        kubectl rollout status deployment/${{ env.SERVICE_NAME }} \
+          -n confuse-platform --timeout=120s
+
