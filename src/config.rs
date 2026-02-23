@@ -38,9 +38,9 @@ impl McpConfig {
             host: std::env::var("HOST").unwrap_or_else(|_| "0.0.0.0".to_string()),
             
             // Search and retrieval services
-            embeddings_service_url: std::env::var("EMBEDDINGS_SERVICE_URL").ok(),
-            relation_graph_url: std::env::var("RELATION_GRAPH_URL").ok(),
-            decision_engine_url: std::env::var("DECISION_ENGINE_URL").ok(),
+            embeddings_service_url: std::env::var("EMBEDDINGS_SERVICE_GRPC_ADDR").ok(),
+            relation_graph_url: std::env::var("RELATION_GRAPH_GRPC_ADDR").ok(),
+            decision_engine_url: std::env::var("DECISION_ENGINE_GRPC_ADDR").ok(),
             ollama_url: std::env::var("OLLAMA_URL").ok(),
             
             // Azure Blob Storage
