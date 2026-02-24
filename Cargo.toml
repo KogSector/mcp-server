@@ -48,6 +48,10 @@ sha2 = "0.10"
 base64 = "0.22"
 hmac = "0.12"
 
+# gRPC
+tonic = "0.10"
+prost = "0.12"
+
 # Configuration
 dotenv = "0.15"
 anyhow = "1.0"
@@ -62,3 +66,6 @@ bytes = "1.5"
 
 # MCP Protocol
 jsonrpc-core = "18.0"
+
+[build-dependencies]
+tonic-build = "0.10"

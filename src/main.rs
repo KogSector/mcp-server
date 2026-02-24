@@ -41,6 +41,15 @@ async fn main() -> Result<()> {
         "Initialized search and retrieval services"
     );
 
+    // Start gRPC server
+    let grpc_search_manager = Arc::new(search_manager.clone());
+    let grpc_config = Arc::new(config.clone());
+    let grpc_handle = tokio::spawn(async move {
+        if let Err(e) = crate::grpc_server::start_grpc_server(grpc_search_manager, grpc_config).await {
+            tracing::error!("gRPC server failed: {}", e);
+        }
+    });
+
     // Start minimal HTTP server for health checks only
     let port = std::env::var("MCP_PORT").unwrap_or_else(|_| "3004".to_string());
     let port_num: u16 = port.parse().unwrap_or(3004);
@@ -74,6 +83,7 @@ async fn main() -> Result<()> {
     tracing::info!("✅ MCP service running");
     tracing::info!("   MCP Protocol: stdio");
     tracing::info!("   Health Check: http://0.0.0.0:{}", port_num);
+    tracing::info!("   gRPC Server: 0.0.0.0:50056");
     tracing::info!("   Tools: context_search, graph_query, embeddings_search, blob_retrieval");
     
     // Keep service running as long as HTTP health server is alive
@@ -81,6 +91,9 @@ async fn main() -> Result<()> {
     if let Err(e) = http_handle.await {
         tracing::error!("HTTP server task error: {}", e);
     }
+    
+    // Wait for gRPC server to finish
+    let _ = grpc_handle.await;
     
     Ok(())
 }
