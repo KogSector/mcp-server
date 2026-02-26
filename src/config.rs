@@ -17,10 +17,6 @@ pub struct McpConfig {
     pub azure_blob_connection_string: Option<String>,
     pub azure_blob_container: String,
     
-    // ChromaDB for vector storage
-    pub chroma_api_key: Option<String>,
-    pub chroma_collection_id: String,
-    
     // Timeouts
     pub request_timeout_secs: u64,
     pub cache_ttl_secs: u64,
@@ -47,11 +43,6 @@ impl McpConfig {
             azure_blob_connection_string: std::env::var("AZURE_BLOB_CONNECTION_STRING").ok(),
             azure_blob_container: std::env::var("AZURE_BLOB_CONTAINER")
                 .unwrap_or_else(|_| "confuse-chunks".to_string()),
-            
-            // ChromaDB
-            chroma_api_key: std::env::var("CHROMA_API_KEY").ok(),
-            chroma_collection_id: std::env::var("CHROMA_COLLECTION_ID")
-                .unwrap_or_else(|_| "e1376d02-4afd-41ec-993b-ba03e7c41ceb".to_string()),
             
             request_timeout_secs: std::env::var("REQUEST_TIMEOUT_SECS")
                 .unwrap_or_else(|_| "30".to_string())
